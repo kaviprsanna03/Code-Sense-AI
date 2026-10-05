@@ -13,7 +13,7 @@ def analyze_file(file_path: Path) -> dict:
     structure = extract_code_structure(tree)
 
     return {
-        "file": str(file_path),
+        "file": file_path,
         "language": "python",
         **structure,
     }

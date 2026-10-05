@@ -20,25 +20,43 @@ def extract_code_structure(tree):
 
     def walk(node):
         if node.type == "import_from_statement":
-            imports.append(node.text.decode("utf-8"))
+            module_node = node.child_by_field_name("module_name")
+
+            if module_node:
+                imports.append(
+                    module_node.text.decode("utf-8")
+                )
 
         elif node.type == "import_statement":
-            imports.append(node.text.decode("utf-8"))
+            for child in node.named_children:
+                if child.type == "dotted_name":
+                    imports.append(
+                        child.text.decode("utf-8")
+                    )
 
         elif node.type == "class_definition":
             name_node = node.child_by_field_name("name")
+
             if name_node:
-                classes.append(name_node.text.decode("utf-8"))
+                classes.append(
+                    name_node.text.decode("utf-8")
+                )
 
         elif node.type == "function_definition":
             name_node = node.child_by_field_name("name")
+
             if name_node:
-                functions.append(name_node.text.decode("utf-8"))
+                functions.append(
+                    name_node.text.decode("utf-8")
+                )
 
         elif node.type == "call":
             function_node = node.child_by_field_name("function")
+
             if function_node:
-                calls.append(function_node.text.decode("utf-8"))
+                calls.append(
+                    function_node.text.decode("utf-8")
+                )
 
         for child in node.children:
             walk(child)

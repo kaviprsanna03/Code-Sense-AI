@@ -1,6 +1,6 @@
 from app.repository import clone_repository
 from app.analyzer import analyze_repository
-from app.graph import build_code_graph
+from app.graph import build_code_graph, get_dependents
 
 
 repo_url = "https://github.com/pallets/flask.git"
@@ -9,17 +9,24 @@ repo_path = clone_repository(repo_url)
 
 analysis_results = analyze_repository(repo_path)
 
-graph = build_code_graph(analysis_results)
+graph = build_code_graph(
+    analysis_results,
+    repo_path,
+)
 
-print(f"Nodes: {graph.number_of_nodes()}")
-print(f"Edges: {graph.number_of_edges()}")
+target_file = str(
+    repo_path / "src" / "flask" / "config.py"
+)
 
-print("\nFirst 10 nodes:")
+dependents = get_dependents(
+    graph,
+    target_file,
+)
 
-for node, data in list(graph.nodes(data=True))[:10]:
-    print(node, data)
+print(f"\nTarget file:")
+print(target_file)
 
-print("\nFirst 10 edges:")
+print(f"\nFiles depending on config.py: {len(dependents)}")
 
-for source, target, data in list(graph.edges(data=True))[:10]:
-    print(source, "→", target, data)
+for file_path in dependents:
+    print(file_path)
