@@ -1,4 +1,3 @@
-from pathlib import Path
 from app.repository import clone_repository
 from app.import_resolver import (
     build_module_index,
