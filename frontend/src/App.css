@@ -1,229 +1,1150 @@
+/* =========================================================
+   GLOBAL
+   ========================================================= */
+
+* {
+  box-sizing: border-box;
+}
+
+
 .app {
   min-height: 100vh;
+
   background: #0b0d10;
+
   color: #f5f5f5;
 }
 
+
+/* =========================================================
+   TOP BAR
+   ========================================================= */
+
 .topbar {
   min-height: 76px;
+
   padding: 14px 32px;
+
   display: flex;
   align-items: center;
   justify-content: space-between;
+
   gap: 24px;
+
   border-bottom: 1px solid #22262d;
+
   background: #0f1115;
 }
 
-.topbar h1 {
+
+.brand h1 {
   margin: 0;
+
   font-size: 20px;
+  font-weight: 700;
 }
 
-.topbar p {
+
+.brand p {
   margin: 4px 0 0;
-  color: #8b919b;
-  font-size: 13px;
+
+  color: #777e89;
+
+  font-size: 12px;
 }
+
+
+/* =========================================================
+   REPOSITORY INPUT
+   ========================================================= */
 
 .repo-controls {
   display: flex;
   gap: 10px;
 }
 
+
 .repo-controls input {
-  width: 360px;
+  width: 380px;
+
   padding: 11px 14px;
+
   border: 1px solid #30353d;
   border-radius: 8px;
+
   outline: none;
+
   background: #15181d;
+
   color: #f5f5f5;
+
+  font-size: 12px;
 }
+
+
+.repo-controls input::placeholder {
+  color: #5f6670;
+}
+
 
 .repo-controls input:focus {
-  border-color: #666d78;
+  border-color: #555d68;
 }
 
+
 .analyze-button {
-  border: none;
+  border: 1px solid #f5f5f5;
   border-radius: 8px;
+
   padding: 11px 18px;
+
   background: #f5f5f5;
+
   color: #0b0d10;
+
+  font-size: 12px;
   font-weight: 600;
+
   cursor: pointer;
 }
 
+
+.analyze-button:hover {
+  background: #dfe1e4;
+}
+
+
 .analyze-button:disabled {
-  opacity: 0.6;
+  opacity: 0.55;
+
   cursor: wait;
 }
 
+
+/* =========================================================
+   WORKSPACE
+   ========================================================= */
+
 .workspace {
   width: 100%;
+
   padding: 24px;
 }
 
-.graph-panel {
-  width: 100%;
+
+.explorer-panel {
   height: calc(100vh - 124px);
-  min-height: 500px;
-  border: 1px solid #22262d;
-  border-radius: 12px;
+
+  min-height: 600px;
+
   overflow: hidden;
+
+  border: 1px solid #22262d;
+
+  border-radius: 12px;
+
   background: #0f1115;
 }
 
+
+/* =========================================================
+   PANEL HEADER
+   ========================================================= */
+
 .panel-header {
-  height: 56px;
-  padding: 0 20px;
+  height: 68px;
+
+  padding: 12px 20px;
+
   display: flex;
   align-items: center;
-  justify-content: space-between;
+
   border-bottom: 1px solid #22262d;
 }
 
+
 .panel-header h2 {
   margin: 0;
+
   font-size: 15px;
 }
 
-.panel-header span {
-  color: #707782;
-  font-size: 12px;
+
+.panel-header p {
+  margin: 4px 0 0;
+
+  color: #686f7a;
+
+  font-size: 11px;
 }
 
-.graph-container {
-  position: relative;
-  width: 100%;
-  height: calc(100% - 56px);
-  min-height: 500px;
+
+/* =========================================================
+   STATS
+   ========================================================= */
+
+.stats-bar {
+  height: 48px;
+
+  padding: 0 20px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 28px;
+
+  border-bottom: 1px solid #22262d;
+
+  background: #0d0f13;
 }
 
-.error-message {
-  position: absolute;
-  z-index: 10;
-  top: 90px;
-  left: 50%;
-  transform: translateX(-50%);
-  padding: 10px 14px;
-  border: 1px solid #5c3030;
-  border-radius: 8px;
-  background: #241416;
-  color: #ffb4b4;
+
+.stat {
+  display: flex;
+  align-items: baseline;
+
+  gap: 6px;
+}
+
+
+.stat strong {
+  color: #e4e6e9;
+
   font-size: 13px;
 }
 
-.placeholder-content {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-content: center;
-  text-align: center;
-  pointer-events: none;
+
+.stat span {
+  color: #666d78;
+
+  font-size: 10px;
 }
 
-.placeholder-icon {
+
+/* =========================================================
+   MAIN EXPLORER
+   ========================================================= */
+
+.explorer-content {
+  display: grid;
+
+  grid-template-columns:
+    360px
+    minmax(0, 1fr);
+
+  height: calc(100% - 116px);
+}
+
+
+/* =========================================================
+   LEFT REPOSITORY TREE
+   ========================================================= */
+
+.repository-tree {
+  overflow: hidden;
+
+  border-right: 1px solid #22262d;
+
+  background: #0c0f13;
+}
+
+
+.tree-header {
+  height: 44px;
+
+  padding: 0 16px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  border-bottom: 1px solid #22262d;
+
+  color: #686f7a;
+
+  font-size: 9px;
+  font-weight: 700;
+
+  letter-spacing: 0.1em;
+}
+
+
+.tree-header span:last-child {
+  color: #4f5660;
+
+  font-weight: 500;
+
+  letter-spacing: normal;
+}
+
+
+.tree-content {
+  height: calc(100% - 44px);
+
+  overflow-y: auto;
+
+  padding: 8px 0;
+}
+
+
+/* =========================================================
+   TREE ITEMS
+   ========================================================= */
+
+.tree-item {
+  min-height: 34px;
+
+  padding-right: 16px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 7px;
+
+  color: #aeb4bd;
+
+  font-size: 12px;
+
+  cursor: pointer;
+
+  transition:
+    background 0.12s ease,
+    color 0.12s ease;
+}
+
+
+.tree-item:hover {
+  background: #15191f;
+
+  color: #f0f1f3;
+}
+
+
+.tree-item.selected {
+  background: #1b2027;
+
+  color: #f5f5f5;
+}
+
+
+.tree-chevron {
+  width: 12px;
+
+  color: #707782;
+
+  font-size: 14px;
+
+  text-align: center;
+}
+
+
+.tree-spacer {
+  width: 12px;
+}
+
+
+.tree-icon {
+  width: 16px;
+
+  text-align: center;
+
+  font-size: 11px;
+}
+
+
+.tree-icon.package {
+  color: #b9bec6;
+}
+
+
+.tree-icon.file {
+  color: #737b86;
+}
+
+
+.tree-name {
+  overflow: hidden;
+
+  white-space: nowrap;
+
+  text-overflow: ellipsis;
+}
+
+
+/* =========================================================
+   EMPTY TREE
+   ========================================================= */
+
+.tree-empty {
+  padding: 50px 30px;
+
+  text-align: center;
+
+  color: #626974;
+
+  font-size: 12px;
+}
+
+
+.tree-empty div {
+  margin-bottom: 12px;
+
+  font-size: 24px;
+
+  color: #777e89;
+}
+
+
+.tree-empty p {
+  margin: 0;
+
+  line-height: 1.6;
+}
+
+
+/* =========================================================
+   RIGHT OVERVIEW
+   ========================================================= */
+
+.overview-panel {
+  position: relative;
+
+  overflow: auto;
+
+  background: #0b0d10;
+}
+
+
+.overview-empty {
+  position: absolute;
+
+  inset: 0;
+
+  display: grid;
+
+  place-content: center;
+
+  padding: 40px;
+
+  text-align: center;
+}
+
+
+.overview-icon {
+  width: 52px;
+  height: 52px;
+
   margin: 0 auto 16px;
-  width: 48px;
-  height: 48px;
+
   display: grid;
   place-items: center;
+
   border: 1px solid #30353d;
+
   border-radius: 12px;
-  color: #aeb4bd;
+
+  color: #858c97;
+
   font-size: 22px;
 }
 
-.placeholder-content h3 {
+
+.overview-empty h3 {
   margin: 0 0 8px;
-  font-size: 18px;
+
+  font-size: 17px;
 }
 
-.placeholder-content p {
-  max-width: 360px;
+
+.overview-empty p {
+  max-width: 350px;
+
   margin: 0;
-  color: #777e89;
-  line-height: 1.6;
-  font-size: 13px;
-}
 
-.react-flow__node {
-  padding: 10px 14px;
-  border: 1px solid #3a414b;
-  border-radius: 8px;
-  background: #15181d;
-  color: #f5f5f5;
+  color: #686f7a;
+
   font-size: 12px;
+
+  line-height: 1.6;
 }
 
-.node-details {
-  position: absolute;
-  z-index: 20;
-  top: 16px;
-  right: 16px;
-  width: 300px;
-  padding: 20px;
-  border: 1px solid #30353d;
-  border-radius: 12px;
-  background: rgba(15, 17, 21, 0.96);
-  backdrop-filter: blur(10px);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+
+/* =========================================================
+   SELECTED NODE
+   ========================================================= */
+
+.selected-node-view {
+  padding: 36px 42px;
 }
 
-.node-details h3 {
-  margin: 6px 0 20px;
-  font-size: 15px;
-  line-height: 1.5;
+
+.selected-header {
+  padding-bottom: 28px;
+
+  border-bottom: 1px solid #22262d;
+}
+
+
+.selected-header h2 {
+  margin: 8px 0 0;
+
+  font-size: 22px;
+
+  font-weight: 600;
+
   word-break: break-word;
 }
 
-.details-label {
-  margin: 0;
-  color: #777e89;
-  font-size: 10px;
+
+/* =========================================================
+   NODE BADGE
+   ========================================================= */
+
+.node-type-badge {
+  display: inline-flex;
+
+  padding: 5px 8px;
+
+  border: 1px solid #30353d;
+
+  border-radius: 5px;
+
+  color: #858c97;
+
+  font-size: 9px;
+
   font-weight: 700;
-  letter-spacing: 0.12em;
+
+  text-transform: uppercase;
+
+  letter-spacing: 0.08em;
 }
 
-.details-section {
+
+.node-type-badge.package {
+  color: #d5d8dc;
+}
+
+
+.node-type-badge.file {
+  color: #aeb4bd;
+}
+
+
+/* =========================================================
+   INFORMATION CARDS
+   ========================================================= */
+
+.info-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+
+  gap: 10px;
+
+  margin-top: 24px;
+}
+
+
+.info-card {
+  min-height: 82px;
+
+  padding: 14px;
+
   display: flex;
+
   flex-direction: column;
-  gap: 5px;
-  padding: 12px 0;
-  border-top: 1px solid #22262d;
+
+  justify-content: space-between;
+
+  gap: 10px;
+
+  border: 1px solid #22262d;
+
+  border-radius: 9px;
+
+  background: #0f1217;
 }
 
-.details-section span {
-  color: #777e89;
-  font-size: 11px;
+
+.info-card span {
+  color: #686f7a;
+
+  font-size: 10px;
 }
 
-.details-section strong {
-  font-size: 13px;
+
+.info-card strong {
+  color: #e5e7ea;
+
+  font-size: 18px;
 }
 
-.details-section code {
-  color: #b9c0ca;
-  font-size: 11px;
+
+.info-card code {
+  color: #aeb4bd;
+
+  font-size: 10px;
+
+  line-height: 1.5;
+
   word-break: break-all;
 }
 
-.close-button {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  width: 28px;
-  height: 28px;
-  border: 1px solid #30353d;
-  border-radius: 6px;
-  background: transparent;
-  color: #aeb4bd;
-  font-size: 18px;
-  cursor: pointer;
+
+/* =========================================================
+   NEXT FEATURE SECTION
+   ========================================================= */
+
+.coming-section {
+  margin-top: 28px;
+
+  padding: 20px;
+
+  border: 1px solid #22262d;
+
+  border-radius: 10px;
+
+  background: #0f1217;
 }
 
-.close-button:hover {
+
+.coming-section > span {
+  color: #5f6670;
+
+  font-size: 9px;
+
+  font-weight: 700;
+
+  letter-spacing: 0.1em;
+}
+
+
+.coming-section h3 {
+  margin: 8px 0 6px;
+
+  font-size: 14px;
+}
+
+
+.coming-section p {
+  max-width: 550px;
+
+  margin: 0;
+
+  color: #707782;
+
+  font-size: 12px;
+
+  line-height: 1.6;
+}
+
+
+/* =========================================================
+   ERROR
+   ========================================================= */
+
+.error-message {
+  position: absolute;
+
+  z-index: 30;
+
+  top: 130px;
+
+  left: 50%;
+
+  transform: translateX(-50%);
+
+  padding: 10px 14px;
+
+  border: 1px solid #5c3030;
+
+  border-radius: 8px;
+
+  background: #241416;
+
+  color: #ffb4b4;
+
+  font-size: 13px;
+}
+
+
+/* =========================================================
+   SCROLLBAR
+   ========================================================= */
+
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+
+
+::-webkit-scrollbar-track {
+  background: #0b0d10;
+}
+
+
+::-webkit-scrollbar-thumb {
+  border-radius: 4px;
+
+  background: #30353d;
+}
+
+
+::-webkit-scrollbar-thumb:hover {
+  background: #454c56;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 900px) {
+
+  .topbar {
+    flex-direction: column;
+
+    align-items: stretch;
+  }
+
+
+  .repo-controls {
+    width: 100%;
+  }
+
+
+  .repo-controls input {
+    width: 100%;
+  }
+
+
+  .explorer-content {
+    grid-template-columns:
+      280px
+      minmax(0, 1fr);
+  }
+
+}
+
+
+@media (max-width: 650px) {
+
+  .workspace {
+    padding: 12px;
+  }
+
+
+  .explorer-content {
+    grid-template-columns: 1fr;
+  }
+
+
+  .repository-tree {
+    height: 45%;
+
+    border-right: none;
+
+    border-bottom: 1px solid #22262d;
+  }
+
+
+  .overview-panel {
+    height: 55%;
+  }
+
+
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+
+}
+
+/* =========================================================
+   DEPENDENCY INTELLIGENCE
+   ========================================================= */
+
+.dependency-section {
+  margin-top: 28px;
+}
+
+
+.dependency-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  margin-bottom: 12px;
+}
+
+
+.dependency-header > div:first-child > span {
+  color: #5f6670;
+
+  font-size: 9px;
+  font-weight: 700;
+
+  letter-spacing: 0.1em;
+}
+
+
+.dependency-header h3 {
+  margin: 6px 0 0;
+
+  font-size: 15px;
+  font-weight: 600;
+}
+
+
+.dependency-legend {
+  display: flex;
+  align-items: center;
+
+  gap: 14px;
+
+  color: #6f7680;
+
+  font-size: 10px;
+}
+
+
+.dependency-legend span {
+  display: flex;
+  align-items: center;
+
+  gap: 5px;
+}
+
+
+.legend-dot {
+  width: 7px;
+  height: 7px;
+
+  display: inline-block;
+
+  border-radius: 50%;
+
+  background: #555d68;
+}
+
+
+.legend-dot.selected {
+  background: #e5e7ea;
+}
+
+
+.legend-dot.import {
+  background: #737b86;
+}
+
+
+.legend-dot.dependent {
+  background: #454c56;
+}
+
+
+/* =========================================================
+   DEPENDENCY GRAPH
+   ========================================================= */
+
+.dependency-graph {
+  position: relative;
+
+  width: 100%;
+  height: 360px;
+
+  overflow: hidden;
+
+  border: 1px solid #22262d;
+
+  border-radius: 10px;
+
+  background: #0b0d10;
+}
+
+
+.dependency-graph .react-flow {
+  background: #0b0d10;
+}
+
+
+.dependency-node {
+  width: 180px;
+  min-height: 48px;
+
+  padding: 10px 14px;
+
+  display: flex;
+  align-items: center;
+
+  border: 1px solid #343a43;
+
+  border-radius: 8px;
+
+  background: #13161b;
+
+  color: #cdd1d6;
+
+  font-size: 11px;
+
+  box-shadow:
+    0 5px 16px rgba(0, 0, 0, 0.22);
+}
+
+
+.dependency-node.selected {
+  border-color: #d8dadd;
+
   background: #20242b;
+
+  color: #ffffff;
+
+  font-weight: 600;
+
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.08),
+    0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+
+.dependency-graph
+  .react-flow__edge-path {
+  stroke: #555d68;
+
+  stroke-width: 1.2;
+}
+
+
+.dependency-graph
+  .react-flow__controls {
+  border-color: #30353d;
+}
+
+
+.dependency-graph
+  .react-flow__controls-button {
+  background: #15181d;
+
+  color: #aeb4bd;
+
+  border-color: #30353d;
+}
+
+
+.graph-empty {
+  position: absolute;
+
+  inset: 0;
+
+  display: grid;
+
+  place-items: center;
+
+  color: #626974;
+
+  font-size: 12px;
+}
+
+
+/* =========================================================
+   RELATIONSHIP LISTS
+   ========================================================= */
+
+.relationship-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+
+  gap: 10px;
+
+  margin-top: 12px;
+}
+
+
+.relationship-card {
+  min-height: 130px;
+
+  padding: 14px;
+
+  border: 1px solid #22262d;
+
+  border-radius: 9px;
+
+  background: #0f1217;
+}
+
+
+.relationship-title {
+  display: flex;
+  align-items: center;
+
+  gap: 7px;
+
+  color: #aeb4bd;
+
+  font-size: 11px;
+}
+
+
+.relationship-title strong {
+  margin-left: auto;
+
+  color: #e4e6e9;
+
+  font-size: 11px;
+}
+
+
+.relationship-dot {
+  width: 7px;
+  height: 7px;
+
+  border-radius: 50%;
+
+  background: #555d68;
+}
+
+
+.relationship-dot.import {
+  background: #737b86;
+}
+
+
+.relationship-dot.dependent {
+  background: #454c56;
+}
+
+
+.relationship-list {
+  display: flex;
+  flex-direction: column;
+
+  gap: 4px;
+
+  margin-top: 12px;
+
+  max-height: 150px;
+
+  overflow-y: auto;
+}
+
+
+.relationship-item {
+  width: 100%;
+
+  padding: 7px 8px;
+
+  border: 1px solid transparent;
+
+  border-radius: 5px;
+
+  background: transparent;
+
+  color: #7f8792;
+
+  font-family:
+    ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    Monaco,
+    Consolas,
+    monospace;
+
+  font-size: 10px;
+
+  text-align: left;
+
+  cursor: pointer;
+
+  transition:
+    background 0.12s ease,
+    color 0.12s ease,
+    border-color 0.12s ease;
+}
+
+
+.relationship-item:hover {
+  border-color: #30353d;
+
+  background: #171a20;
+
+  color: #e2e4e7;
+}
+
+
+.empty-text {
+  color: #505762;
+
+  font-size: 10px;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 800px) {
+
+  .relationship-grid {
+    grid-template-columns: 1fr;
+  }
+
+
+  .dependency-header {
+    align-items: flex-start;
+
+    flex-direction: column;
+
+    gap: 12px;
+  }
+
+}
+
+/* =========================================================
+   DEPENDENCY NODE TYPES
+   ========================================================= */
+
+.dependency-node.import-node {
+  border-color: #343a43;
+  background: #111419;
+  color: #9da4ae;
+}
+
+
+.dependency-node.dependent-node {
+  border-color: #343a43;
+  background: #15181d;
+  color: #aeb4bd;
+}
+
+
+.dependency-node.selected {
+  border-color: #d8dadd;
+  background: #20242b;
+  color: #ffffff;
+
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.08),
+    0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+
+/* =========================================================
+   DEPENDENCY EDGE DIRECTIONS
+   ========================================================= */
+
+.dependency-graph
+  .react-flow__edge-path {
+  stroke: #555d68;
+  stroke-width: 1.3;
+}
+
+
+.dependency-graph
+  .react-flow__edge:hover
+  .react-flow__edge-path {
+  stroke: #aeb4bd;
+  stroke-width: 1.8;
 }

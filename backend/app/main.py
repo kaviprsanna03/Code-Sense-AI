@@ -49,11 +49,16 @@ def analyze_repository_endpoint(repo_url: str):
     )
 
     nodes = [
-        {
-            "id": normalize_node_id(node, repo_path),
-            "type": data.get("type"),
-        }
-        for node, data in graph.nodes(data=True)
+    {
+        "id": normalize_node_id(node, repo_path),
+        "type": data.get("type"),
+        "name": (
+            node.split("::", 1)[-1]
+            if "::" in node
+            else node.split("\\")[-1].split("/")[-1]
+        ),
+    }
+    for node, data in graph.nodes(data=True)
     ]
 
     edges = [
