@@ -1,23 +1,57 @@
+
 from pathlib import Path
+
+SOURCE_EXTENSIONS = {".py", ".js", ".jsx", ".ts", ".tsx"}
+
+IGNORED_DIRECTORIES = {
+    ".git", "node_modules", ".venv", "venv",
+    "__pycache__", "dist", "build", ".next", "coverage",
+}
 
 
 def build_module_index(repo_path: Path) -> dict[str, Path]:
-    module_index = {}
+    """Index Python modules and JavaScript/TypeScript files."""
+    repo_path = repo_path.resolve()
+    module_index: dict[str, Path] = {}
 
-    for file_path in repo_path.rglob("*.py"):
+    for file_path in repo_path.rglob("*"):
+        if not file_path.is_file():
+            continue
+
         relative_path = file_path.relative_to(repo_path)
 
-        if relative_path.parts[0] in {"src", "lib"}:
-            module_parts = relative_path.parts[1:]
-        else:
-            module_parts = relative_path.parts
+        if any(part in IGNORED_DIRECTORIES for part in relative_path.parts):
+            continue
 
-        if file_path.name == "__init__.py":
-            module_name = ".".join(module_parts[:-1])
-        else:
-            module_name = ".".join(module_parts).removesuffix(".py")
+        extension = file_path.suffix.lower()
+        if extension not in SOURCE_EXTENSIONS:
+            continue
 
-        module_index[module_name] = file_path
+        # Index JS/TS modules by repository-relative path.
+        relative_key = relative_path.with_suffix("").as_posix()
+        module_index[relative_key] = file_path
+
+        if file_path.stem == "index":
+            parent_key = relative_path.parent.as_posix()
+            if parent_key != ".":
+                module_index[parent_key] = file_path
+
+        # Also index Python modules using dotted import names.
+        if extension == ".py":
+            parts = list(relative_path.parts)
+
+            # Support common source layouts.
+            if parts and parts[0] in {"backend", "src", "lib"}:
+                parts = parts[1:]
+
+            if file_path.name == "__init__.py":
+                module_parts = parts[:-1]
+            else:
+                module_parts = parts[:-1] + [file_path.stem]
+
+            module_name = ".".join(module_parts)
+            if module_name:
+                module_index[module_name] = file_path
 
     return module_index
 
@@ -28,26 +62,44 @@ def resolve_import(
     repo_path: Path,
     module_index: dict[str, Path],
 ) -> Path | None:
+    """Resolve local Python and relative JS/TS imports."""
+    repo_path = repo_path.resolve()
+    current_file = current_file.resolve()
 
-    if not import_name.startswith("."):
-        return module_index.get(import_name)
+    # Relative imports: ./App, ../utils/helper, etc.
+    if import_name.startswith("."):
+        base = (current_file.parent / import_name).resolve()
 
-    level = len(import_name) - len(import_name.lstrip("."))
+        candidates = [base]
 
-    module_name = import_name.lstrip(".")
+        if not base.suffix:
+            candidates.extend(
+                base.with_suffix(ext)
+                for ext in (".js", ".jsx", ".ts", ".tsx", ".py")
+            )
+            candidates.extend(
+                base / f"index{ext}"
+                for ext in (".js", ".jsx", ".ts", ".tsx")
+            )
 
-    relative_file = current_file.relative_to(repo_path)
+        for candidate in candidates:
+            if not candidate.is_file():
+                continue
 
-    package_parts = list(relative_file.parent.parts)
+            resolved = candidate.resolve()
 
-    if package_parts and package_parts[0] in {"src", "lib"}:
-        package_parts = package_parts[1:]
+            try:
+                resolved.relative_to(repo_path)
+            except ValueError:
+                continue
 
-    base_parts = package_parts[:len(package_parts) - (level - 1)]
+            return resolved
 
-    if module_name:
-        base_parts.extend(module_name.split("."))
+        relative_key = (
+            current_file.parent / import_name
+        ).relative_to(repo_path).as_posix()
 
-    resolved_module = ".".join(base_parts)
+        return module_index.get(relative_key)
 
-    return module_index.get(resolved_module)
+    # Absolute Python imports, e.g. app.parser or app.graph.
+    return module_index.get(import_name)

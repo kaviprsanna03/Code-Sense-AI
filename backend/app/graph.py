@@ -1,3 +1,6 @@
+
+from pathlib import Path
+
 import networkx as nx
 
 from app.import_resolver import (
@@ -6,30 +9,35 @@ from app.import_resolver import (
 )
 
 
+IGNORED_DIRECTORIES = {
+    ".git",
+    "node_modules",
+    ".venv",
+    "venv",
+    "__pycache__",
+    "dist",
+    "build",
+    ".next",
+    "coverage",
+}
+
+
 def add_package_hierarchy(
     graph: nx.DiGraph,
-    file_path,
-    repo_path,
+    file_path: Path,
+    repo_path: Path,
 ):
     relative_path = file_path.relative_to(repo_path)
+    directory_parts = list(relative_path.parent.parts)
 
-    directory_parts = list(
-        relative_path.parent.parts
-    )
-
-    # Ignore the repository root.
     if not directory_parts:
         return
 
-    # Build package hierarchy from the
-    # source directory down to the file's parent.
     current_path = repo_path
-
     previous_package = None
 
     for part in directory_parts:
         current_path = current_path / part
-
         package_id = str(current_path)
 
         graph.add_node(
@@ -47,7 +55,6 @@ def add_package_hierarchy(
 
         previous_package = package_id
 
-    # Connect the deepest package to the file.
     if previous_package is not None:
         graph.add_edge(
             previous_package,
@@ -58,48 +65,34 @@ def add_package_hierarchy(
 
 def build_code_graph(
     analysis_results: list[dict],
-    repo_path,
+    repo_path: Path,
 ) -> nx.DiGraph:
-
     graph = nx.DiGraph()
+    repo_path = repo_path.resolve()
 
-    module_index = build_module_index(
-        repo_path
-    )
+    module_index = build_module_index(repo_path)
 
     for result in analysis_results:
-
-        file_path = result["file"]
-
+        file_path = Path(result["file"]).resolve()
         file_id = str(file_path)
 
-        # --------------------------------------------------
-        # FILE NODE
-        # --------------------------------------------------
-
+        # File node
         graph.add_node(
             file_id,
             type="file",
             name=file_path.name,
-            language=result["language"],
+            language=result.get("language", "unknown"),
         )
 
-        # --------------------------------------------------
-        # PACKAGE HIERARCHY
-        # --------------------------------------------------
-
+        # Folder/package hierarchy
         add_package_hierarchy(
             graph,
             file_path,
             repo_path,
         )
 
-        # --------------------------------------------------
-        # IMPORT RELATIONSHIPS
-        # --------------------------------------------------
-
-        for imported in result["imports"]:
-
+        # Import relationships
+        for imported in result.get("imports", []):
             resolved_file = resolve_import(
                 imported,
                 file_path,
@@ -110,7 +103,15 @@ def build_code_graph(
             if resolved_file is None:
                 continue
 
+            resolved_file = Path(resolved_file).resolve()
+
             if resolved_file == file_path:
+                continue
+
+            if resolved_file not in {
+                Path(item["file"]).resolve()
+                for item in analysis_results
+            }:
                 continue
 
             graph.add_edge(
@@ -119,15 +120,9 @@ def build_code_graph(
                 type="imports",
             )
 
-        # --------------------------------------------------
-        # CLASS NODES
-        # --------------------------------------------------
-
-        for class_name in result["classes"]:
-
-            class_id = (
-                f"{file_path}::{class_name}"
-            )
+        # Classes and functions
+        for class_name in result.get("classes", []):
+            class_id = f"{file_id}::{class_name}"
 
             graph.add_node(
                 class_id,
@@ -141,15 +136,8 @@ def build_code_graph(
                 type="contains",
             )
 
-        # --------------------------------------------------
-        # FUNCTION NODES
-        # --------------------------------------------------
-
-        for function_name in result["functions"]:
-
-            function_id = (
-                f"{file_path}::{function_name}"
-            )
+        for function_name in result.get("functions", []):
+            function_id = f"{file_id}::{function_name}"
 
             graph.add_node(
                 function_id,
@@ -170,7 +158,8 @@ def get_dependents(
     graph: nx.DiGraph,
     file_path: str,
 ) -> list[str]:
-
-    return list(
-        graph.predecessors(file_path)
-    )
+    return [
+        predecessor
+        for predecessor in graph.predecessors(file_path)
+        if graph.edges[predecessor, file_path].get("type") == "imports"
+    ]
