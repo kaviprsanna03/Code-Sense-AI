@@ -1148,3 +1148,224 @@
   stroke: #aeb4bd;
   stroke-width: 1.8;
 }
+
+.qa-panel {
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.16);
+}
+
+.qa-heading > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #b7b7b7 !important;
+  font-size: 10px !important;
+  letter-spacing: 0.16em !important;
+}
+
+.qa-title {
+  letter-spacing: -0.035em;
+  line-height: 1.25;
+}
+
+.qa-description {
+  max-width: 680px;
+  color: #a5a5a5;
+  font-size: 14px;
+}
+
+.qa-form { gap: 14px !important; }
+
+.qa-question-input {
+  min-height: 100px;
+  border-color: #343434 !important;
+  background: #0c0c0c !important;
+  border-radius: 12px !important;
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.qa-question-input:focus {
+  outline: none;
+  border-color: #777 !important;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.055);
+}
+
+.qa-results { animation: qa-result-enter 220ms ease-out; }
+
+.qa-section-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+.qa-answer {
+  position: relative;
+  padding: 20px !important;
+  border-color: #303030 !important;
+  border-radius: 12px !important;
+  background: #0b0b0b !important;
+  color: #e5e5e5;
+  font-size: 14px;
+  line-height: 1.85 !important;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.qa-sources { gap: 9px !important; }
+
+.qa-source-card {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 7px 16px !important;
+  padding: 13px 15px !important;
+  border-color: #2c2c2c !important;
+  border-radius: 10px !important;
+  background: #111 !important;
+  transition: border-color 160ms ease, background 160ms ease;
+}
+
+.qa-source-card:hover {
+  border-color: #505050 !important;
+  background: #151515 !important;
+}
+
+.qa-source-file {
+  min-width: 0;
+  color: #ededed;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.qa-source-lines {
+  grid-column: 1;
+  color: #a1a1a1;
+  font-size: 12px !important;
+}
+
+.qa-source-score {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  justify-self: end;
+  padding: 4px 7px;
+  border: 1px solid #303030;
+  border-radius: 6px;
+  color: #a9a9a9;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.qa-index-stats {
+  color: #8c8c8c;
+  line-height: 1.6;
+}
+
+@keyframes qa-result-enter {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 600px) {
+  .qa-panel { padding: 18px !important; }
+  .qa-answer { padding: 15px !important; font-size: 13px; }
+  .qa-source-card { grid-template-columns: minmax(0, 1fr); }
+  .qa-source-score { grid-column: 1; grid-row: auto; justify-self: start; }
+}
+
+.qa-answer .qa-md-h1,
+.qa-answer .qa-md-h2,
+.qa-answer .qa-md-h3 {
+  line-height: 1.4;
+  margin: 22px 0 10px;
+  font-weight: 650;
+}
+
+.qa-answer .qa-md-h1 {
+  font-size: 1.35rem;
+}
+
+.qa-answer .qa-md-h2 {
+  font-size: 1.15rem;
+}
+
+.qa-answer .qa-md-h3 {
+  font-size: 1rem;
+}
+
+.qa-answer .qa-md-p {
+  margin: 10px 0;
+}
+
+.qa-answer .qa-md-list {
+  padding-left: 24px;
+  margin: 10px 0;
+}
+
+.qa-answer .qa-md-list li {
+  margin: 5px 0;
+}
+
+.qa-answer .qa-inline-code {
+  padding: 2px 6px;
+  border-radius: 5px;
+  background: rgba(127, 127, 127, 0.18);
+  font-family: monospace;
+  font-size: 0.9em;
+  overflow-wrap: anywhere;
+}
+
+.qa-answer .qa-code-block {
+  max-width: 100%;
+  overflow-x: auto;
+  padding: 14px;
+  border: 1px solid var(--border-color, #2b3445);
+  border-radius: 8px;
+  background: #080d16;
+  line-height: 1.6;
+  font-size: 13px;
+}
+
+.qa-answer .qa-code-block code {
+  font-family: "Consolas", "Courier New", monospace;
+  white-space: pre;
+}
+
+.qa-answer a {
+  color: var(--accent-color, #7c9cff);
+  overflow-wrap: anywhere;
+}
+
+/* CodeSense AI — final Q&A readability polish */
+
+.qa-answer {
+  font-size: 14px;
+  line-height: 1.8;
+  overflow-wrap: anywhere;
+}
+
+.qa-answer .qa-md-h1:first-child,
+.qa-answer .qa-md-h2:first-child,
+.qa-answer .qa-md-h3:first-child {
+  margin-top: 0;
+}
+
+.qa-answer .qa-code-block {
+  margin: 14px 0 18px;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.qa-answer .qa-md-list li {
+  padding-left: 3px;
+  line-height: 1.75;
+}
+
+.qa-answer hr {
+  border: 0;
+  border-top: 1px solid var(--border-color, #2b3445);
+  margin: 22px 0;
+}

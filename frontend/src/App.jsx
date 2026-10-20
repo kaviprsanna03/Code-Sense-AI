@@ -1,3 +1,5 @@
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { useMemo, useState } from "react";
 
 import {
@@ -27,6 +29,12 @@ function App() {
   const [loading, setLoading] = useState(false);
 
   const [error, setError] = useState("");
+
+  // AI codebase Q&A
+  const [question, setQuestion] = useState("");
+  const [qaLoading, setQaLoading] = useState(false);
+  const [qaError, setQaError] = useState("");
+  const [qaResult, setQaResult] = useState(null);
 
 
   // =====================================================
@@ -102,6 +110,57 @@ function App() {
       setError(err.message);
     } finally {
       setLoading(false);
+    }
+  }
+
+
+  // =====================================================
+  // ASK QUESTIONS ABOUT THE REPOSITORY
+  // =====================================================
+
+  async function askRepository() {
+    if (!repoUrl.trim()) {
+      setQaError("Enter a GitHub repository URL first.");
+      return;
+    }
+
+    if (!question.trim()) {
+      setQaError("Enter a question about the codebase.");
+      return;
+    }
+
+    setQaLoading(true);
+    setQaError("");
+    setQaResult(null);
+
+    try {
+      const response = await fetch("http://127.0.0.1:8000/ask", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          repo_url: repoUrl.trim(),
+          question: question.trim(),
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        const detail = typeof data.detail === "string"
+          ? data.detail
+          : "Unable to answer your question.";
+        throw new Error(detail);
+      }
+
+      setQaResult(data);
+    } catch (err) {
+      setQaError(
+        err.message || "Could not connect to the CodeSense backend."
+      );
+    } finally {
+      setQaLoading(false);
     }
   }
 
@@ -325,8 +384,8 @@ function App() {
 
                 <span className="tree-chevron">
                   {isExpanded
-                    ? "⌄"
-                    : "›"}
+                    ? "\u2304"
+                    : "\u203A"}
                 </span>
 
               ) : (
@@ -343,8 +402,8 @@ function App() {
               >
                 {node.type ===
                 "package"
-                  ? "▰"
-                  : "□"}
+                  ? "\u25B0"
+                  : "\u25A1"}
               </span>
 
 
@@ -548,7 +607,7 @@ function App() {
 
 
       // -----------------------------------------------
-      // IMPORTS — LEFT
+      // IMPORTS - LEFT
       // -----------------------------------------------
 
       importNodes.forEach(
@@ -587,7 +646,7 @@ function App() {
 
 
       // -----------------------------------------------
-      // SELECTED FILE — CENTER
+      // SELECTED FILE - CENTER
       // -----------------------------------------------
 
       nodes.push({
@@ -614,7 +673,7 @@ function App() {
 
 
       // -----------------------------------------------
-      // DEPENDENTS — RIGHT
+      // DEPENDENTS - RIGHT
       // -----------------------------------------------
 
       dependentNodes.forEach(
@@ -659,7 +718,7 @@ function App() {
       const edges = [];
 
 
-      // Selected file → imported files
+      // Selected file -> imported files
 
       selectedStats.imports.forEach(
         (edge, index) => {
@@ -684,7 +743,7 @@ function App() {
       );
 
 
-      // Dependent files → selected file
+      // Dependent files -> selected file
 
       selectedStats.dependents.forEach(
         (edge, index) => {
@@ -942,7 +1001,7 @@ function App() {
                   <div className="tree-empty">
 
                     <div>
-                      ◇
+                      {"\u25C7"}
                     </div>
 
                     <p>
@@ -978,7 +1037,7 @@ function App() {
                 <div className="overview-empty">
 
                   <div className="overview-icon">
-                    ◇
+                    {"\u25C7"}
                   </div>
 
                   <h3>
@@ -1455,6 +1514,183 @@ function App() {
 
           </div>
 
+        </section>
+
+        {/* =====================================================
+            AI CODEBASE Q&A
+            ===================================================== */}
+        <section
+          className="qa-panel"
+          style={{
+            margin: "24px 0",
+            padding: "24px",
+            border: "1px solid var(--border-color, #2b3445)",
+            borderRadius: "16px",
+            background: "var(--panel-bg, #111827)",
+            color: "var(--text-primary, #e5e7eb)",
+          }}
+        >
+          <div className="qa-heading" style={{ marginBottom: "18px" }}>
+            <span
+              style={{
+                color: "var(--accent-color, #7c9cff)",
+                fontSize: "11px",
+                fontWeight: 700,
+                letterSpacing: "1.5px",
+              }}
+            >
+              CODEBASE INTELLIGENCE
+            </span>
+            <h2 className="qa-title" style={{ margin: "8px 0", fontSize: "22px" }}>
+              Ask your codebase
+            </h2>
+            <p className="qa-description" style={{ margin: 0, opacity: 0.75, lineHeight: 1.6 }}>
+              Ask how the repository works and get an answer with source evidence.
+              Use the GitHub URL entered above.
+            </p>
+          </div>
+
+          <form
+            className="qa-form"
+            onSubmit={(event) => {
+              event.preventDefault();
+              askRepository();
+            }}
+            style={{ display: "grid", gap: "12px" }}
+          >
+            <textarea
+              className="qa-question-input"
+              value={question}
+              onChange={(event) => setQuestion(event.target.value)}
+              placeholder="Example: Which function clones the repository, and how does it work?"
+              rows={3}
+              maxLength={2000}
+              aria-label="Question about the repository"
+              style={{
+                width: "100%",
+                boxSizing: "border-box",
+                resize: "vertical",
+                padding: "14px",
+                borderRadius: "10px",
+                border: "1px solid var(--border-color, #374151)",
+                background: "var(--input-bg, #0b1220)",
+                color: "inherit",
+                font: "inherit",
+                lineHeight: 1.5,
+              }}
+            />
+            <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
+              <button
+                type="submit"
+                disabled={qaLoading}
+                className="analyze-button"
+                style={{ padding: "11px 18px", cursor: qaLoading ? "wait" : "pointer" }}
+              >
+                {qaLoading ? "Analyzing codebase..." : "Ask CodeSense"}
+              </button>
+              {qaLoading && (
+                <span style={{ fontSize: "13px", opacity: 0.75 }}>
+                  Cloning, indexing, and searching repository code. This may take a little while.
+                </span>
+              )}
+            </div>
+          </form>
+
+          {qaError && (
+            <div
+              role="alert"
+              className="error-message"
+              style={{ marginTop: "16px" }}
+            >
+              {qaError}
+            </div>
+          )}
+
+          {qaResult && (
+            <div className="qa-results" style={{ marginTop: "24px" }}>
+              <h3 className="qa-section-title" style={{ marginBottom: "10px" }}>Answer</h3>
+              <div
+                className="qa-answer"
+                style={{
+                  padding: "16px",
+                  borderRadius: "10px",
+                  background: "var(--answer-bg, #0b1220)",
+                  border: "1px solid var(--border-color, #2b3445)",
+                  lineHeight: 1.7,
+                  whiteSpace: "pre-wrap",
+                  overflowWrap: "anywhere",
+                }}
+              >
+              <ReactMarkdown
+  remarkPlugins={[remarkGfm]}
+  components={{
+    h1: ({ children }) => <h1 className="qa-md-h1">{children}</h1>,
+    h2: ({ children }) => <h2 className="qa-md-h2">{children}</h2>,
+    h3: ({ children }) => <h3 className="qa-md-h3">{children}</h3>,
+    p: ({ children }) => <p className="qa-md-p">{children}</p>,
+    ul: ({ children }) => <ul className="qa-md-list">{children}</ul>,
+    ol: ({ children }) => <ol className="qa-md-list">{children}</ol>,
+    li: ({ children }) => <li>{children}</li>,
+    strong: ({ children }) => <strong>{children}</strong>,
+    code: ({ children, className }) => {
+      const isBlock = /language-/.test(className || "");
+
+      return isBlock ? (
+        <code className={className}>{children}</code>
+      ) : (
+        <code className="qa-inline-code">{children}</code>
+      );
+    },
+    pre: ({ children }) => (
+      <pre className="qa-code-block">{children}</pre>
+    ),
+  }}
+>
+  {qaResult.answer || "No answer was returned."}
+</ReactMarkdown>
+              </div>
+
+              <h3 className="qa-section-title" style={{ margin: "22px 0 10px" }}>Source evidence</h3>
+              {Array.isArray(qaResult.sources) && qaResult.sources.length > 0 ? (
+                <div className="qa-sources" style={{ display: "grid", gap: "10px" }}>
+                  {qaResult.sources.map((source, index) => (
+                    <article
+                      className="qa-source-card"
+                      key={`${source.file || "source"}-${source.start_line || 0}-${index}`}
+                      style={{
+                        display: "grid",
+                        gap: "6px",
+                        padding: "14px",
+                        borderRadius: "10px",
+                        border: "1px solid var(--border-color, #2b3445)",
+                        background: "var(--source-bg, #151e2e)",
+                      }}
+                    >
+                      <strong className="qa-source-file" style={{ overflowWrap: "anywhere" }}>
+                        {source.file || "Unknown file"}
+                      </strong>
+                      <span className="qa-source-lines" style={{ fontSize: "13px", opacity: 0.8 }}>
+                        Lines {source.start_line ?? "?"}–{source.end_line ?? "?"}
+                      </span>
+                      {Number.isFinite(Number(source.score)) && (
+                        <span className="qa-source-score" style={{ fontSize: "12px", opacity: 0.7 }}>
+                          Retrieval score: {Number(source.score).toFixed(3)}
+                        </span>
+                      )}
+                    </article>
+                  ))}
+                </div>
+              ) : (
+                <p style={{ opacity: 0.75 }}>No source references were returned for this answer.</p>
+              )}
+
+              {qaResult.index_stats && (
+                <p className="qa-index-stats" style={{ marginTop: "16px", fontSize: "12px", opacity: 0.65 }}>
+                  Indexed {qaResult.index_stats.chunks_created ?? "?"} code chunks from {qaResult.index_stats.files_read ?? "?"} files.
+                </p>
+              )}
+            </div>
+          )}
         </section>
 
       </main>

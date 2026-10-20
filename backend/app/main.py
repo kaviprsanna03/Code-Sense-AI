@@ -1,6 +1,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from pydantic import BaseModel, Field
+from app.rag.qa import ask_repository
+
 from app.repository import clone_repository
 from app.analyzer import analyze_repository
 from app.graph import build_code_graph
@@ -74,3 +77,15 @@ def analyze_repository_endpoint(repo_url: str):
         "nodes": nodes,
         "edges": edges,
     }
+
+class AskRequest(BaseModel):
+    repo_url: str
+    question: str = Field(min_length=1, max_length=2000)
+
+
+@app.post("/ask")
+def ask_repository_endpoint(request: AskRequest):
+    return ask_repository(
+        repo_url=request.repo_url,
+        question=request.question,
+    )
