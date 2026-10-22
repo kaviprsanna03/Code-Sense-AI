@@ -1,13 +1,26 @@
-from sentence_transformers import SentenceTransformer
 
+from functools import lru_cache
+
+from sentence_transformers import SentenceTransformer
 
 MODEL_NAME = "all-MiniLM-L6-v2"
 
-model = SentenceTransformer(MODEL_NAME)
+
+@lru_cache(maxsize=1)
+def get_model() -> SentenceTransformer:
+    """Load the embedding model only when first needed."""
+    return SentenceTransformer(
+        MODEL_NAME,
+        device="cpu",
+    )
 
 
 def embed_text(text: str) -> list[float]:
-    vector = model.encode(text)
+    vector = get_model().encode(
+        text,
+        convert_to_numpy=True,
+        show_progress_bar=False,
+    )
     return vector.tolist()
 
 
@@ -17,10 +30,11 @@ def embed_texts(
     if not texts:
         return []
 
-    vectors = model.encode(
+    vectors = get_model().encode(
         texts,
         convert_to_numpy=True,
-        show_progress_bar=True,
+        show_progress_bar=False,
+        batch_size=8,
     )
 
     return vectors.tolist()
